@@ -1,6 +1,5 @@
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
@@ -70,19 +69,22 @@ class UserDetailView(APIView):
             return Response({
                 "status_code": status.HTTP_200_OK,
                 "message": "User details retrieved successfully",
+                "timestamp": datetime.now(),
                 "data": serializer.data
             }, status=status.HTTP_200_OK)
 
         except User.DoesNotExist:
             return Response({
                 "status_code": status.HTTP_404_NOT_FOUND,
-                "message": "User not found."
+                "message": "User not found.",
+                "timestamp": datetime.now(),
             }, status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
             return Response({
                 "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
                 "message": "An error occurred while retrieving the user details.",
+                "timestamp": datetime.now(),
                 "error": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -103,21 +105,25 @@ class UserDetailView(APIView):
             user.delete()
             return Response({
                 "status_code": status.HTTP_200_OK,
-                "message": "User deleted successfully"
+                "message": "User deleted successfully",
+                "timestamp": datetime.now(),
             }, status=status.HTTP_200_OK)
 
         except User.DoesNotExist:
             return Response({
                 "status_code": status.HTTP_404_NOT_FOUND,
-                "message": "User not found."
+                "message": "User not found.",
+                "timestamp": datetime.now(),
             }, status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
             return Response({
                 "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
                 "message": "An error occurred while deleting the user.",
+                "timestamp": datetime.now(),
                 "error": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
     @extend_schema(
         tags=["User Management"],
@@ -128,54 +134,44 @@ class UserDetailView(APIView):
             200: OpenApiResponse(description='User details updated successfully'),
             400: OpenApiResponse(description='Validation error'),
             404: OpenApiResponse(description='User not found'),
-            403: OpenApiResponse(description='Forbidden: Authentication required'),
         }
     )
     def put(self, request, id):
         try:
             user = User.objects.get(id=id)
-            
-            user_serializer = UserViewSerializer(user)
 
-            new_user_data = UserUpdateSerializer(data=request.data)
+            serializer = UserUpdateSerializer(instance=user, data=request.data, context={'user_id': user.id})
 
-            if not new_user_data.is_valid():
+            if not serializer.is_valid():
                 return Response({
                     "status_code": status.HTTP_400_BAD_REQUEST,
                     "message": "Validation error",
-                    "errors": new_user_data.errors
+                    "timestamp": datetime.now(),
+                    "errors": serializer.errors
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            validated_data = new_user_data.validated_data 
-
-            user.first_name = validated_data.get('first_name', user.first_name)
-            user.last_name = validated_data.get('last_name', user.last_name)
-            user.email = validated_data.get('email', user.email)
-            user.username = validated_data.get('username', user.username)
-            user.save()
+            serializer.save()
 
             return Response({
                 "status_code": status.HTTP_200_OK,
                 "message": "User updated successfully",
-                "data": user_serializer.data
+                "timestamp": datetime.now(),
+                "data": UserViewSerializer(user).data
             }, status=status.HTTP_200_OK)
 
         except User.DoesNotExist:
             return Response({
                 "status_code": status.HTTP_404_NOT_FOUND,
-                "message": "User not found."
+                "message": "User not found.",
+                "timestamp": datetime.now(),
             }, status=status.HTTP_404_NOT_FOUND)
-
-        except ValidationError as e:
-            return Response({
-                "status_code": status.HTTP_400_BAD_REQUEST,
-                "message": "Validation error",
-                "errors": str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             return Response({
                 "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
                 "message": "An error occurred while updating the user details.",
-                "error": str(e)
+                "error": str(e),
+                "timestamp": datetime.now(),
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+

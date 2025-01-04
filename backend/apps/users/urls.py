@@ -10,4 +10,5 @@ urlpatterns = [
 
     path('users', UsersListView.as_view(), name='users-list'),
     path('users/<int:id>', UserDetailView.as_view(), name='user-detail'),
+    
 ]
