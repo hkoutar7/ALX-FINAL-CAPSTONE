@@ -1,21 +1,19 @@
 from drf_spectacular.utils import extend_schema, OpenApiResponse
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from datetime import datetime
-
+from rest_framework.authentication import BaseAuthentication
 from apps.users.serialisers import RegisterSerializer, LoginSerializer
 
-@csrf_exempt
 class RegisterView(generics.CreateAPIView):
     """
         API for user registration
     """
-
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
+    authentication_classes = [BaseAuthentication]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -28,8 +26,11 @@ class RegisterView(generics.CreateAPIView):
             "data": serializer.data
         })
 
-@extend_schema( request=LoginSerializer, responses={200: OpenApiResponse(response=LoginSerializer)})
-@csrf_exempt
+
+@extend_schema(
+    request=LoginSerializer,  # This will define the request body schema
+    responses={200: OpenApiResponse(response=LoginSerializer)},  # Define the expected response
+)
 class LoginView(APIView):
     """
     API for user login
@@ -45,4 +46,3 @@ class LoginView(APIView):
             "timestamp": str(datetime.now()),
             "data": serializer.validated_data
         })
-

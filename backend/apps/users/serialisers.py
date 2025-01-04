@@ -15,7 +15,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
 
 
-
 class RegisterSerializer(serializers.ModelSerializer):
     """
         Serializer for user registration
@@ -38,18 +37,13 @@ class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
-    print("LoginSerializer")
-    print(f"username: {username} | password: {password}")   
-
-def validate(self, data):
-    print(f"Trying to authenticate with username: {data.get('username')}")
-    user = authenticate(**data)
-    if user and user.is_active:
-        refresh = RefreshToken.for_user(user)
-        return {
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
-            'user': UserSerializer(user).data
-        }
-    print("Authentication failed.")
-    raise serializers.ValidationError("Invalid credentials")
+    def validate(self, data):
+        user = authenticate(username=data['username'], password=data['password'])
+        if user and user.is_active:
+            refresh = RefreshToken.for_user(user)
+            return {
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+                'user': UserSerializer(user).data
+            }
+        raise serializers.ValidationError("Invalid credentials")
