@@ -8,9 +8,9 @@ class PostPagination(PageNumberPagination):
     """
         Pagination class for handling paginated responses for posts.
     """
-    page_size = 50
+    page_size = 10
     page_size_query_param = 'page_size'
-    max_page_size = 100 
+    max_page_size = 100
 
     def get_paginated_response(self, data):
         return Response({
@@ -24,5 +24,4 @@ class PostPagination(PageNumberPagination):
                 'results': data
             }
         })
-
 
