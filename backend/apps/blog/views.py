@@ -6,7 +6,7 @@ from rest_framework import status
 from django.db.models import Q
 
 from config.response import generate_response
-from apps.blog.serializers import  PostViewSerializer
+from apps.blog.serializers import PostViewSerializer, PostCreateSerializer, PostUpdateSerializer
 from apps.blog.models import Post, PostCategory
 from apps.blog.pagination import PostPagination 
 
@@ -40,42 +40,28 @@ class PostListCreateView(APIView):
         except Exception as e:
             return generate_response(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred while retrieving posts, error: {str(e)}", None)
 
-    # @extend_schema(
-    #     tags=["Post"],
-    #     summary="Create a new post",
-    #     request=PostCreateSerializer,
-    #     description="Create a new blog post with categories and tags.",
-    #     responses={
-    #         201: OpenApiResponse(description='Post created successfully', response=PostViewSerializer),
-    #         400: OpenApiResponse(description='Validation error'),
-    #         403: OpenApiResponse(description='Forbidden: Authentication required'),
-    #     }
-    # )
-    # def post(self, request):
-    #     serializer = PostCreateSerializer(data=request.data)
-    #     if serializer.is_valid():
-    #         try:
-    #             post = serializer.save(author=request.user)
-    #             response_serializer = PostViewSerializer(post)
-    #             return generate_response(
-    #                 status.HTTP_201_CREATED,
-    #                 "Post created successfully",
-    #                 response_serializer.data,
-    #             )
-    #         except Exception as e:
-    #             # Catch unexpected server-side errors
-    #             return generate_response(
-    #                 status.HTTP_500_INTERNAL_SERVER_ERROR,
-    #                 "An error occurred while creating the post.",
-    #                 str(e),
-    #             )
-    #     else:
-    #         # Return validation errors
-    #         return generate_response(
-    #             status.HTTP_400_BAD_REQUEST,
-    #             "Validation error",
-    #             serializer.errors,
-    #         )
+
+    @extend_schema(
+        tags=["Post"],
+        summary="Create a new post",
+        description="Create a new post.",
+        request=PostCreateSerializer,
+        responses={
+            201: OpenApiResponse(description='Post created successfully', response=PostViewSerializer),
+            400: OpenApiResponse(description='Invalid data'),
+            403: OpenApiResponse(description='Forbidden: Authentication required'),
+        }
+    )
+    def post(self, request):
+        serializer = PostCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            post = serializer.save(author=request.user)
+            response_serializer = PostViewSerializer(post)
+            return generate_response(status.HTTP_201_CREATED, "Post created successfully", response_serializer.data)
+        except Exception as e:
+            return generate_response(status.HTTP_400_BAD_REQUEST, f"Error creating post: {str(e)}", None)
 
 
 
@@ -289,6 +275,38 @@ class PostDetailView(APIView):
 
         except Exception as e:
             return generate_response(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred while deleting the post: {str(e)}", None)
+
+    @extend_schema(
+        tags=["Post"],
+        summary="Update a post",
+        description="Update a post by ID. Users can only update their own posts. This is a full replacement (PUT).",
+        request=PostUpdateSerializer,
+        responses={
+            200: OpenApiResponse(description='Post updated successfully', response=PostViewSerializer),
+            403: OpenApiResponse(description='Forbidden: You are not authorized to update this post'),
+            404: OpenApiResponse(description='Post not found'),
+        }
+    )
+    def put(self, request, post_id):
+        try:
+            post = Post.objects.get(id=post_id)
+
+            if post.author != request.user:
+                return generate_response(status.HTTP_403_FORBIDDEN, "You are not authorized to update this post", None)
+
+            serializer = PostUpdateSerializer(post, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            updated_post = serializer.save()
+
+            response_serializer = PostViewSerializer(updated_post)
+            return generate_response(status.HTTP_200_OK, "Post updated successfully", response_serializer.data)
+
+        except Post.DoesNotExist:
+            return generate_response(status.HTTP_404_NOT_FOUND, "Post not found", None)
+
+        except Exception as e:
+            return generate_response(status.HTTP_500_INTERNAL_SERVER_ERROR, f"An error occurred while updating the post: {str(e)}", None)
+
 
 
 

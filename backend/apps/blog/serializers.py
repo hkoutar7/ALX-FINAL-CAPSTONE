@@ -4,116 +4,108 @@ from apps.blog.models import Post, Category, Tag, PostCategory
 from apps.users.models import User
 
 
+# View Serialisers 
 
-class CategorySerializer(serializers.ModelSerializer):
+class CategoryViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name', 'description']
 
 
-class PostCategorySerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
+class PostCategoryViewSerializer(serializers.ModelSerializer):
+    category = CategoryViewSerializer()
 
     class Meta:
         model = PostCategory
         fields = ['id', 'category']
 
 
-class TagSerializer(serializers.ModelSerializer):
+class TagViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ['id', 'name']
 
 
-class AuthorSerializer(serializers.ModelSerializer):
+class AuthorViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
 
 
 class PostViewSerializer(serializers.ModelSerializer):
-    author = AuthorSerializer()
-    tags = TagSerializer(many=True)
-    post_categories = PostCategorySerializer(many=True, source='categories')
+    author = AuthorViewSerializer()
+    tags = TagViewSerializer(many=True)
+    post_categories = PostCategoryViewSerializer(many=True, source='categories')
 
     class Meta:
         model = Post
         fields = [ 'id', 'title', 'content', 'status', 'author', 'post_categories', 'tags']
 
 
+# Create Serialisers 
+
+class TagCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['name']
+
+class PostCategoryCreateSerializer(serializers.ModelSerializer):
+    category_id = serializers.IntegerField()
+
+    class Meta:
+        model = PostCategory
+        fields = ['category_id']
 
 
+class PostCreateSerializer(serializers.ModelSerializer):
+    tags = TagCreateSerializer(many=True)
+    post_categories = PostCategoryCreateSerializer(many=True, source='categories')
+
+    class Meta:
+        model = Post
+        fields = ['title', 'content', 'status', 'post_categories', 'tags']
+
+    def create(self, validated_data):
+        tags_data = validated_data.pop('tags', [])
+        categories_data = validated_data.pop('categories', [])
+        post = Post.objects.create(**validated_data)
+
+        for tag_data in tags_data:
+            Tag.objects.create(post=post, **tag_data)
+
+        for category_data in categories_data:
+            category = Category.objects.get(id=category_data['category_id'])
+            PostCategory.objects.create(post=post, category=category)
+
+        return post
 
 
+# Update Serialisers 
 
+class PostUpdateSerializer(serializers.ModelSerializer):
+    tags = TagCreateSerializer(many=True)
+    post_categories = PostCategoryCreateSerializer(many=True, source='categories')
 
+    class Meta:
+        model = Post
+        fields = ['title', 'content', 'status', 'post_categories', 'tags']
 
+    def update(self, instance, validated_data):
+        tags_data = validated_data.pop('tags', [])
+        categories_data = validated_data.pop('categories', [])
 
+        instance.title = validated_data.get('title', None)
+        instance.content = validated_data.get('content', None)
+        instance.status = validated_data.get('status', None)
+        instance.save()
 
+        instance.tags.all().delete()
+        for tag_data in tags_data:
+            Tag.objects.create(post=instance, **tag_data)
 
+        instance.categories.all().delete()
+        for category_data in categories_data:
+            category = Category.objects.get(id=category_data['category_id'])
+            PostCategory.objects.create(post=instance, category=category)
 
-# # Category Serializer (View Only)
-# class CategorySerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Category
-#         fields = ['id', 'name', 'description']
-
-# # Tag Serializer (View Only)
-# class TagSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Tag
-#         fields = ['id', 'name']
-
-# # Post Creation Serializer
-# class PostCreateSerializer(serializers.ModelSerializer):
-#     categories = serializers.ListField(
-#         child=serializers.IntegerField(), write_only=True
-#     )  # Accept category IDs as a list
-#     tags = serializers.ListField(
-#         child=serializers.CharField(), write_only=True
-#     )  # Accept tags as a list of strings
-
-#     class Meta:
-#         model = Post
-#         fields = ['title', 'content', 'status', 'categories', 'tags']
-
-#     def validate_categories(self, category_ids):
-#         # Validate categories exist
-#         if not Category.objects.filter(id__in=category_ids).exists():
-#             raise serializers.ValidationError("One or more category IDs are invalid.")
-#         return category_ids
-
-#     def validate_tags(self, tags):
-#         # Ensure tags are unique
-#         if len(tags) != len(set(tags)):
-#             raise serializers.ValidationError("Duplicate tags are not allowed.")
-#         return tags
-
-#     def create(self, validated_data):
-#         categories = validated_data.pop('categories', [])
-#         tags = validated_data.pop('tags', [])
-
-#         post = Post.objects.create(**validated_data)
-
-#         # Associate categories
-#         PostCategory.objects.bulk_create(
-#             [PostCategory(post=post, category_id=cat_id) for cat_id in categories]
-#         )
-
-#         # Create tags
-#         Tag.objects.bulk_create([Tag(post=post, name=tag) for tag in tags])
-
-#         return post
-
-
-
-# class PostViewSerializer(serializers.ModelSerializer):
-#     # Example of incorrect usage:
-#     categories = serializers.ListSerializer(child=serializers.CharField(), source='categories')
-
-#     # Correct usage:
-#     categories = serializers.ListSerializer(child=serializers.CharField())
-
-#     class Meta:
-#         model = Post
-#         fields = '__all__'
+        return instance

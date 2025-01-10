@@ -45,7 +45,6 @@ REST_FRAMEWORK = {
 }
 
 
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -136,11 +135,11 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'API Blog Post',
-    'DESCRIPTION': 'This is a blog post API', 
+    'TITLE': 'API Blog Post : BlogPuilsem',
+    'DESCRIPTION': 'An MVP API Project for managing blog posts, including creating, updating, deleting, and retrieving posts as well as advanced searching and user managmnt.',
     'VERSION': '1.0.0', 
     'CONTACT': {
-        'name': 'Koujo 7',
+        'name': 'Hamza 7',
         'email': 'koujo7@gmail.com',
     },
     'LICENSE': {
