@@ -1,23 +1,20 @@
-INSERT INTO categories (name, description)
+INSERT INTO categories (name, description, created_at, updated_at)
 VALUES
-    ('Technology', 'All things related to technology, gadgets, software, and innovation.'),
-    ('Science', 'Exploring the latest in scientific research, discoveries, and innovations.'),
-    ('Health', 'Topics related to wellness, medicine, fitness, and health-related news.'),
-    ('Lifestyle', 'Articles about lifestyle, culture, travel, and personal growth.'),
-    ('Business', 'Insights on business trends, entrepreneurship, and the corporate world.'),
-    ('Education', 'Focus on educational topics, learning resources, and academic news.'),
-    ('Entertainment', 'Latest trends and news in movies, music, TV shows, and celebrity gossip.'),
-    ('Sports', 'Covers everything from professional sports to personal fitness and outdoor activities.'),
-    ('Politics', 'Political news, opinions, and commentary from around the world.'),
-    ('Food & Drink', 'Articles on food recipes, restaurants, cooking techniques, and drinks.'),
-    ('Travel', 'Exploring the world with travel guides, destinations, and tips for adventurers.'),
-    ('Art & Design', 'Everything related to visual arts, design trends, and creative inspiration.'),
-    ('Finance', 'Financial advice, market updates, investing, and money management tips.'),
-    ('Gaming', 'Latest video game news, reviews, and updates on gaming culture.'),
-    ('Environment', 'Environmental issues, sustainability, and eco-friendly living.'),
-    ('History', 'Historical events, analysis, and stories that shaped our world.'),
-    ('Fashion', 'Trends in fashion, clothing, accessories, and personal style tips.'),
-    ('Music', 'All about music, from album reviews to artist interviews and music history.'),
-    ('Books', 'Book reviews, literary discussions, and the latest in the publishing world.');
-
-
+    ('Technology', 'All things related to technology, gadgets, software, and innovation.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Science', 'Exploring the latest in scientific research, discoveries, and innovations.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Health', 'Topics related to wellness, medicine, fitness, and health-related news.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Lifestyle', 'Articles about lifestyle, culture, travel, and personal growth.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Business', 'Insights on business trends, entrepreneurship, and the corporate world.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Education', 'Focus on educational topics, learning resources, and academic news.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Entertainment', 'Latest trends and news in movies, music, TV shows, and celebrity gossip.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Sports', 'Covers everything from professional sports to personal fitness and outdoor activities.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Politics', 'Political news, opinions, and commentary from around the world.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Food & Drink', 'Articles on food recipes, restaurants, cooking techniques, and drinks.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Travel', 'Exploring the world with travel guides, destinations, and tips for adventurers.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Art & Design', 'Everything related to visual arts, design trends, and creative inspiration.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Finance', 'Financial advice, market updates, investing, and money management tips.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Gaming', 'Latest video game news, reviews, and updates on gaming culture.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Environment', 'Environmental issues, sustainability, and eco-friendly living.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('History', 'Historical events, analysis, and stories that shaped our world.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Fashion', 'Trends in fashion, clothing, accessories, and personal style tips.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('Music', 'All about music, from album reviews to artist interviews and music history.', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

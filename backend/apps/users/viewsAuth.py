@@ -71,7 +71,7 @@ class RegisterView(APIView):
         try:
             user_created = UserCreateSerializer(data=request.data)
             if user_created.is_valid():
-                user = user_created.save()
+                user_created.save()
                 return Response({
                     "status_code": status.HTTP_201_CREATED,
                     "message": "User registered successfully",

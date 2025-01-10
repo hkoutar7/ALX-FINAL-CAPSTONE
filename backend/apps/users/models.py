@@ -5,7 +5,7 @@ from django.db import models
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password=None, **extra_fields):
         """
-            Creates and returns a regular user with an email and password.
+            Creates and returns a user with an email and password.
         """
         if not email:
             raise ValueError('The Email field must be set')
@@ -48,7 +48,7 @@ class User(AbstractBaseUser):
 
     def __str__(self):
         """
-            Return a string representation of the user.
+            Return the user.
         """
         return f"Username = {self.username}, Email = {self.email}"
 
